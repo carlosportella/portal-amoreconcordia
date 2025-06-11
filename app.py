@@ -5,8 +5,6 @@ from datetime import timedelta
 import os
 from datetime import datetime
 
-
-
 app = Flask(__name__)
 app.secret_key = 'sua-chave-supersegura'
 
@@ -21,8 +19,18 @@ def datetimeformat(value, format='%d/%m/%Y'):
     except Exception:
         return value  # retorna como está se não conseguir converter
 
+def init_storage_client():
+    # Escreve o JSON da credencial em arquivo temporário
+    key_json = os.getenv('GCLOUD_KEY_JSON')
+    if not key_json:
+        raise RuntimeError("Variável GCLOUD_KEY_JSON não definida")
+    with open('/tmp/gcp_key.json', 'w') as f:
+        f.write(key_json)
+    return storage.Client.from_service_account_json('/tmp/gcp_key.json')
+
 def gerar_link_assinado(nome_arquivo):
-    storage_client = storage.Client.from_service_account_json("livro-atas-amoreconcordia-d661ba1add6d.json")  # nome do arquivo JSON da chave
+    #storage_client = storage.Client.from_service_account_json("livro-atas-amoreconcordia-d661ba1add6d.json")  # nome do arquivo JSON da chave
+    storage_client = init_storage_client()
     bucket = storage_client.bucket("portal-pdfs-carlos")
     blob = bucket.blob(nome_arquivo)
 

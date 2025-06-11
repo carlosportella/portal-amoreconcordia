@@ -8,6 +8,8 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = 'sua-chave-supersegura'
 
+BASE_DIR = os.path.dirname(__file__)
+
 @app.template_filter('primeiro_nome')
 def primeiro_nome(nome):
     return nome.split(' ')[0] if nome else ''
@@ -47,24 +49,23 @@ def carregar_livros():
     with open('livros.json') as f:
         return json.load(f)
 
-def carregar_usuarios():
-    with open('usuarios.json') as f:
-        return json.load(f)
-
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    # rota /
     if request.method == 'POST':
-        sim = request.form['sim']
+        cim = request.form['cim']
         senha = request.form['senha']
-        usuarios = carregar_usuarios()
+
+        with open('usuarios.json', encoding='utf-8') as f:
+            usuarios = json.load(f)   
 
         for u in usuarios:
-            if u['sim'] == sim and u['senha'] == senha:
-                session['usuario'] = u['nome']
-                session['admin'] = u.get('admin', 0)
+            if str(u['CIM']) == cim and u['SENHA'] == senha:
+                session['usuario'] = u['NOME']
+                session['admin']   = int(u.get('ADMIN',0))
                 return redirect('/portal')
 
-        return render_template('login.html', erro="SIM ou senha inválidos.")
+        return render_template('login.html', erro="CIM ou senha inválidos.")
     
     return render_template('login.html')
 
@@ -89,18 +90,28 @@ def logout():
     session.clear()
     return redirect('/')
 
-@app.route('/usuarios', methods=['GET', 'POST'])
+#@app.route('/usuarios', methods=['GET', 'POST'])
+#def usuarios():
+#    if 'usuario' not in session or session.get('admin') < 1:
+#        return render_template('acesso_negado.html')
+#
+#    with open('usuarios.json') as f:
+#        usuarios = json.load(f)
+#
+#    return render_template('usuarios.html', usuarios=usuarios)
+
+@app.route('/usuarios')
 def usuarios():
     if 'usuario' not in session or session.get('admin') < 1:
         return render_template('acesso_negado.html')
-
-    with open('usuarios.json') as f:
+    with open('usuarios.json', encoding='utf-8') as f:
         usuarios = json.load(f)
+    editar   = request.args.get('editar')  # CIM se houver
+    return render_template('usuarios.html', usuarios=usuarios, editar=editar)
 
-    return render_template('usuarios.html', usuarios=usuarios)
 
-@app.route('/salvar_usuario', methods=['POST'])
-def salvar_usuario():
+@app.route('/salvar_usuario_old', methods=['POST'])
+def salvar_usuario_old():
     if 'usuario' not in session or session.get('admin') < 1:
         return render_template('acesso_negado.html')
 
@@ -133,8 +144,38 @@ def salvar_usuario():
 
     return redirect('/usuarios')
 
-@app.route('/excluir_usuario/<sim>')
-def excluir_usuario(sim):
+@app.route('/salvar_usuario', methods=['POST'])
+def salvar_usuario():
+    if 'usuario' not in session or session.get('admin') < 1:
+        return render_template('acesso_negado.html')
+
+    dados = request.form.to_dict(flat=True)
+
+    # Converte valores corretamente
+    dados['CIM'] = int(dados['CIM'])
+    dados['ADMIN'] = int(dados.get('ADMIN', 0))
+
+    # Garante que datas em branco não sejam nulas
+    for campo in ['EMERITO', 'REMIDO', 'HONORARIO']:
+        valor = dados.get(campo, '').strip()
+        dados[campo] = valor if valor else ""
+
+    # Checkbox ATIVO (0 ou 1)
+    dados['ATIVO'] = 1 if 'ATIVO' in request.form else 0
+
+    usuarios = carregar_usuarios()
+    usuarios = [u for u in usuarios if int(u['CIM']) != int(request.form.get('cim_original') or -1)]
+    usuarios.append(dados)
+
+    with open(os.path.join(BASE_DIR, 'usuarios.json'), 'w', encoding='utf-8') as f:
+        json.dump(usuarios, f, indent=2, ensure_ascii=False)
+
+
+    return redirect('/usuarios')
+
+
+@app.route('/excluir_usuario/<sim>/old')
+def excluir_usuario_old(sim):
     if 'usuario' not in session or session.get('admin') < 1:
         return render_template('acesso_negado.html')
 
@@ -147,6 +188,16 @@ def excluir_usuario(sim):
         json.dump(usuarios, f, indent=2)
 
     return redirect('/usuarios')
+
+@app.route('/excluir_usuario/<int:cim>')
+def excluir_usuario(cim):
+    if 'usuario' not in session or session.get('admin') < 1:
+        return render_template('acesso_negado.html')
+    usuarios = [u for u in carregar_usuarios() if int(u['CIM']) != cim]
+    with open(os.path.join(BASE_DIR, 'usuarios.json'),'w') as f:
+        json.dump(usuarios, f, indent=2, ensure_ascii=False)
+    return redirect('/usuarios')
+
 
 @app.route('/livros', methods=['GET'])
 def livros():

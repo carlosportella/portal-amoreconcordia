@@ -5,200 +5,233 @@
     <title>Cadastro de Usuários</title>
     <style>
         html, body {
-            margin: 0;
             height: 100%;
-            overflow: hidden;
+            margin: 0;
             background: url("/static/images/P1010501.JPG") no-repeat center center fixed;
             background-size: cover;
         }
 
         .bg-overlay {
-            position: absolute;
+            position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
             background-color: rgba(255, 255, 255, 0.5);
             z-index: 0;
         }
 
-        .df-container {
+        .portal-container {
             position: relative;
             z-index: 1;
-            width: 100%;
-            height: 100%;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        #flipbook_viewer {
-            width: 100%;
             height: 100%;
-            background-color: transparent !important;
-            box-shadow: none !important;
         }
 
-        .df-ui__background {
-            background: transparent !important;
+        #sidebar {
+            width: 250px;
+            background-color: rgba(248, 249, 250, 0.95);
+            padding: 20px;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar img.logo {
+            max-width: 180px;
+            margin-bottom: 15px;
+        }
+
+        #main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #iframe-viewer {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+        }
+
+        .accordion-button {
+            font-weight: bold;
+        }
+
+        .list-group-item a {
+            display: block;
+            width: 100%;
         }
     </style>    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-        <div class="bg-overlay"></div>
+    <div class="bg-overlay"></div>
 
-        <div class="container mt-5">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Cadastro de Usuários</h4>
-                </div>
-                <div class="card-body">
-                    <form id="usuarioForm" method="POST" action="/salvar_usuario">
-                        <input type="hidden" name="modo" id="modo" value="novo">
-                        <input type="hidden" name="sim_original" id="sim_original" value="">
+    <div class="container mt-5">
 
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label for="sim" class="form-label">SIM</label>
-                                <input type="text" class="form-control" name="sim" id="sim" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="senha" class="form-label">Senha</label>
-                                <input type="password" class="form-control" name="senha" id="senha" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="nome" class="form-label">Nome</label>
-                                <input type="text" class="form-control" name="nome" id="nome" required>
-                            </div>
+        <!---- FORMULÁRIO ---->
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white"><h4 class="mb-0">Cadastro de Usuários</h4></div>
+            <div class="card-body">
+                <form id="usuarioForm" method="POST" action="/salvar_usuario">
+                    <!-- modo / CIM original para edição -->
+                    <input type="hidden" name="modo" id="modo" value="{{ 'editar' if editar else 'novo' }}">
+                    <input type="hidden" name="CIM_original" id="CIM_original" value="{{ editar or '' }}">
 
-                            <div class="col-md-4">
-                                <label for="aniversario" class="form-label">Aniversário</label>
-                                <input type="date" class="form-control" name="aniversario" id="aniversario">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="lojabase" class="form-label">Loja Base</label>
-                                <select class="form-select" name="lojabase" id="lojabase">
-                                    <option value="Aprendiz">Aprendiz</option>
-                                    <option value="Companheiro">Companheiro</option>
-                                    <option value="Mestre">Mestre</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="filosoficos" class="form-label">Filosóficos</label>
-                                <select class="form-select" name="filosoficos" id="filosoficos">
-                                    {% for grau in range(1, 34) %}
-                                    <option value="Grau {{ grau }}">Grau {{ grau }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <div class="col-md-2 form-check ms-3">
-                                <input class="form-check-input" type="checkbox" id="admin" name="admin" value="1">
-                                <label class="form-check-label" for="admin">Admin</label>
-                            </div>
-                            <div class="col-md-2 form-check">
-                                <input class="form-check-input" type="checkbox" id="emerito" name="emerito" value="1">
-                                <label class="form-check-label" for="emerito">Emérito</label>
-                            </div>
-                            <div class="col-md-2 form-check">
-                                <input class="form-check-input" type="checkbox" id="remido" name="remido" value="1">
-                                <label class="form-check-label" for="remido">Remido</label>
-                            </div>
-                            <div class="col-md-2 form-check">
-                                <input class="form-check-input" type="checkbox" id="ativo" name="ativo" value="1" checked>
-                                <label class="form-check-label" for="ativo">Ativo</label>
-                            </div>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label" for="CIM">CIM</label>
+                            <input type="number" class="form-control" id="CIM" name="CIM" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="SENHA">Senha</label>
+                            <input type="password" class="form-control" id="SENHA" name="SENHA" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="NOME">Nome completo</label>
+                            <input type="text" class="form-control" id="NOME" name="NOME" required>
                         </div>
 
-                        <div class="mt-4">
-                            <button type="submit" class="btn btn-success" id="salvarBtn">Salvar</button>
+                        <div class="col-md-6">
+                            <label class="form-label" for="EMAIL">E-mail</label>
+                            <input type="email" class="form-control" id="EMAIL" name="EMAIL">
                         </div>
-                    </form>
-                </div>
-            </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="TELEFONE1">Telefone 1</label>
+                            <input type="text" class="form-control" id="TELEFONE1" name="TELEFONE1">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="TELEFONE2">Telefone 2</label>
+                            <input type="text" class="form-control" id="TELEFONE2" name="TELEFONE2">
+                        </div>
 
-            <div class="card mt-4 shadow">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0">Usuários Cadastrados</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>SIM</th>
-                                <th>Nome</th>
-                                <th>Aniversário</th>
-                                <th>Loja Base</th>
-                                <th>Filosóficos</th>
-                                <th>Emérito</th>
-                                <th>Remido</th>
-                                <th>Admin</th>
-                                <th>Ativo</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for u in usuarios %}
-                            <tr>
-                                <td>
-                                {% if u.admin == 1 %}
-                                    <span class="text-warning" title="Administrador">★</span>
-                                {% endif %}
-                                {% if u.admin == 2 %}
-                                    <span class="text-success" title="Super Administrador">★</span>
-                                {% endif %}
+                        <div class="col-md-3">
+                            <label class="form-label" for="ANIVERSARIO">Aniversário</label>
+                            <input type="text" class="form-control" id="ANIVERSARIO" name="ANIVERSARIO" placeholder="dd/mm/aaaa">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="LOJABASE">Loja Base</label>
+                            <select class="form-select" id="LOJABASE" name="LOJABASE">
+                                <option value="Aprendiz">Aprendiz</option>
+                                <option value="Companheiro">Companheiro</option>
+                                <option value="Mestre">Mestre</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="FISOLSOFICOS">Filosóficos</label>
+                            <select class="form-select" id="FISOLSOFICOS" name="FISOLSOFICOS">
+                                {% for g in range(1,34) %}
+                                    <option value="Grau {{g}}">Grau {{g}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
 
-                                {{ u.sim }}
-                                </td>
-                                <td>{{ u.nome }}</td>
-                                <td>
-                                {% if u.aniversario %}
-                                    {{ u.aniversario | datetimeformat }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                                </td>
-                                <td>{{ u.lojabase }}</td>
-                                <td>{{ u.filosoficos }}</td>
-                                <td>{{ 'Sim' if u.emerito else 'Não' }}</td>
-                                <td>{{ 'Sim' if u.remido else 'Não' }}</td>
-                                <td>{{ 'Sim' if u.admin else 'Não' }}</td>
-                                <td>{{ 'Sim' if u.ativo else 'Não' }}</td>
-                                <td>
-                                    {% if u.admin < 2 %}
-                                        <button type="button" class="btn btn-sm btn-primary" onclick='carregarUsuario({{ u | tojson | safe }})'>Alterar</button>
-                                        <a href="/excluir_usuario/{{ u.sim }}" class="btn btn-sm btn-danger">Excluir</a>
-                                    {% else %}
-                                        <span class="text-muted">Somente leitura</span>
-                                    {% endif %}
-                                </td>
+                        <div class="col-md-3">
+                            <label class="form-label" for="ADMIN">Perfil</label>
+                            <select class="form-select" id="ADMIN" name="ADMIN">
+                                <option value="0">Usuário</option>
+                                <option value="1">Administrador</option>
+                                <option value="2">Super Administrador</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="EMERITO">Data Emérito</label>
+                            <input type="text" class="form-control" id="EMERITO" name="EMERITO" placeholder="DD/MM/AAAA">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="REMIDO">Data Remido</label>
+                            <input type="text" class="form-control" id="REMIDO" name="REMIDO" placeholder="DD/MM/AAAA">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="HONORARIO">Data Honorário</label>
+                            <input type="text" class="form-control" id="HONORARIO" name="HONORARIO" placeholder="DD/MM/AAAA">
+                        </div>
+                        <div class="col-md-2 form-check mt-4">
+                            <input class="form-check-input" type="checkbox" id="ATIVO" name="ATIVO" value="1" checked>
+                            <label class="form-check-label" for="ATIVO">Ativo</label>
+                        </div>
+                    </div>
 
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                    <div class="mt-3">
+                        <label class="form-label" for="OBSERVACOES">Observações</label>
+                        <textarea class="form-control" id="OBSERVACOES" name="OBSERVACOES" rows="2"></textarea>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success">Salvar</button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <script>
-            function carregarUsuario(u) {
-                console.log("Carregando usuário:", u); // debug
-                document.getElementById('modo').value = 'editar';
-                document.getElementById('sim_original').value = u.sim;
-                document.getElementById('sim').value = u.sim;
-                document.getElementById('senha').value = u.senha || '';
-                document.getElementById('nome').value = u.nome || '';
-                document.getElementById('admin').checked = u.admin == 1;
-                document.getElementById('emerito').checked = u.emerito == 1;
-                document.getElementById('remido').checked = u.remido == 1;
-                document.getElementById('ativo').checked = u.ativo == 1;
-                document.getElementById('aniversario').value = u.aniversario || '';
-                document.getElementById('lojabase').value = u.lojabase || 'Aprendiz';
-                document.getElementById('filosoficos').value = u.filosoficos || 'Grau 1';
-            }
-        </script>
+        <!---- LISTAGEM ---->
+        <div class="card mt-4 shadow">
+            <div class="card-header bg-secondary text-white"><h5 class="mb-0">Usuários Cadastrados</h5></div>
+            <div class="card-body p-0">
+                <table class="table table-striped table-hover mb-0">
+                    <thead><tr>
+                        <th>CIM</th><th>Nome</th><th>E-mail</th><th>Admin</th><th>Ativo</th><th>Ações</th>
+                    </tr></thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr>
+                            <td>
+                                {% if u.ADMIN|int == 1 %}
+                                    <span class="text-warning" title="Administrador">★</span>
+                                {% endif %}
+                                {{ u.CIM }}
+                            </td>
+                            <td>{{ u.NOME }}</td>
+                            <td>{{ u.EMAIL }}</td>
+                            <td>{{ 'Sim' if u.ADMIN|int else 'Não' }}</td>
+                            <td>{{ 'Sim' if u.ATIVO|int else 'Não' }}</td>
+                            <td>
+                                {% if u.ADMIN < 2 %}
+                                <button type="button" class="btn btn-sm btn-primary" onclick='carregarUsuario({{ u | tojson | safe }})'>Alterar</button>
+                                <a href="/excluir_usuario/{{u.CIM}}" class="btn btn-sm btn-danger">Excluir</a>
+                                {% else %}
+                                <span class="text-muted">Somente leitura</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
+    </div>
+
+    <script>
+    function formatarDataBRparaInput(dataBR) {
+        if (!dataBR) return '';
+        const [dia, mes, ano] = dataBR.split('/');
+        return `${ano}-${mes}-${dia}`;
+    }
+
+    function carregarUsuario(u) {
+        console.log("Dados recebidos:", u);
+        console.log("Buscando campo: nome");
+        console.log(document.getElementById('nome')); 
+
+        document.getElementById('modo').value = 'editar';
+        document.getElementById('CIM_original').value = u.CIM;
+        document.getElementById('CIM').value = u.CIM;
+        document.getElementById('SENHA').value = u.SENHA || '';
+        document.getElementById('NOME').value = u.NOME || '';
+        document.getElementById('EMAIL').value = u.EMAIL || '';
+        document.getElementById('ADMIN').value = u.ADMIN || 0;
+        document.getElementById('ANIVERSARIO').value = u.ANIVERSARIO || '';
+        document.getElementById('TELEFONE1').value = u.TELEFONE1 || '';
+        document.getElementById('TELEFONE2').value = u.TELEFONE2 || '';
+        document.getElementById('EMERITO').value = (u.EMERITO || '');
+        document.getElementById('REMIDO').value = (u.REMIDO || '');
+        document.getElementById('HONORARIO').value = (u.HONORARIO || '');
+        document.getElementById('LOJABASE').value = u.LOJABASE || 'Aprendiz';
+        document.getElementById('FISOLSOFICOS').value = u.FISOLSOFICOS || '';
+        document.getElementById('ATIVO').checked = u.ATIVO == 1;
+        document.getElementById('OBSERVACOES').value = u.OBSERVACOES || '';
+    }
+    </script>
 
 </body>
 </html>

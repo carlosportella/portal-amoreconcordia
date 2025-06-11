@@ -71,10 +71,10 @@
     <div class="portal-container">
         <div id="sidebar">
             <img src="{{ url_for('static', filename='images/AmorConcordia.png') }}" class="logo" alt="Logo">
-            <h5 class="mb-3">Bem-vindo, {{ usuario }}</h5>
+            <h5 class="mb-3">Bem-vindo, {{ usuario | primeiro_nome }}</h5>
             <a class="btn btn-outline-danger btn-sm mb-4 w-100" href="{{ url_for('logout') }}">Sair</a>
 
-            {% if session.get('admin') == 1 %}
+            {% if session.get('admin') >= 1 %}
             <div class="accordion mb-3" id="adminAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingAdmin">
@@ -88,6 +88,17 @@
                                 <li class="list-group-item p-2">
                                     <a href="#" onclick="abrir('{{ url_for('usuarios') }}', 'Portal Amor e Concórdia – Cadastro de Usuários')" class="text-decoration-none text-dark">Cadastro de Usuários</a>
                                 </li>
+                                <li class="list-group-item p-2">
+                                    <a href="#" onclick="abrir('{{ url_for('sessoes') }}', 'Portal Amor e Concórdia – Cadastro de Sessões')" class="text-decoration-none text-dark">Cadastro de Sessões</a>
+                                </li>
+                                <li class="list-group-item p-2">
+                                    <a href="#" onclick="abrir('{{ url_for('presencas') }}', 'Portal Amor e Concórdia – Cadastro de Presenças')" class="text-decoration-none text-dark">Cadastro de Presenças</a>
+                                </li>
+                                {% if session.get('admin') >= 2 %}
+                                <li class="list-group-item p-2">
+                                    <a href="#" onclick="abrir('{{ url_for('livros') }}', 'Portal Amor e Concórdia – Cadastro de Livros')" class="text-decoration-none text-dark">Cadastro de Livros</a>
+                                </li>                                
+                                {% endif %}
                             </ul>
                         </div>
                     </div>
@@ -102,7 +113,7 @@
                             Livro de Atas
                         </button>
                     </h2>
-                    <div id="collapseLivros" class="accordion-collapse collapse show" data-bs-parent="#livrosAccordion">
+                    <div id="collapseLivros" class="accordion-collapse collapse" data-bs-parent="#livrosAccordion">
                         <div class="accordion-body p-0">
                             <ul class="list-group list-group-flush">
                                 {% for livro in livros %}

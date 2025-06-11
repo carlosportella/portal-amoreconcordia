@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Presenças</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            background: url("/static/images/P1010501.JPG") no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(255, 255, 255, 0.5);
+            z-index: 0;
+        }
+
+        .portal-container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            height: 100%;
+        }
+
+        #sidebar {
+            width: 250px;
+            background-color: rgba(248, 249, 250, 0.95);
+            padding: 20px;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar img.logo {
+            max-width: 180px;
+            margin-bottom: 15px;
+        }
+
+        #main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #iframe-viewer {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+        }
+
+        .accordion-button {
+            font-weight: bold;
+        }
+
+        .list-group-item a {
+            display: block;
+            width: 100%;
+        }
+    </style>    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="bg-light">
+    <div class="bg-overlay"></div>
+    <div class="container mt-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Cadastro de Presenças</h4>
+            </div>
+            <div class="card-body">
+                <form id="presencaForm" method="POST" action="/salvar_presencas">
+                    <input type="hidden" name="modo" id="modo" value="{{ 'editar' if editar else 'novo' }}">
+                    <input type="hidden" name="sessao_original" id="sessao_original" value="{{ editar or '' }}">
+
+                    <div class="mb-3">
+                        <label for="sessao" class="form-label">Sessão</label>
+                        <select class="form-select" name="sessao" id="sessao" required>
+                            <option value="">Selecione a sessão</option>
+                            {% for s in sessoes %}
+                            <option value="{{ s.sessao }}" {% if editar == s.sessao %}selected{% endif %}>
+                                {{ s.sessao | datetimeformat }} - {{ s.grau }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Selecione os presentes</label>
+                        <div class="row">
+                            {% for u in usuarios %}
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="presentes" value="{{ u.sim }}" id="sim{{ u.sim }}" {% if u.sim in presentes_edicao %}checked{% endif %}>
+                                    <label class="form-check-label" for="sim{{ u.sim }}">
+                                        {{ u.sim }} - {{ u.nome.split(' ')[0] }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirmModal">
+                        Salvar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4 shadow">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Sessões com Presenças</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Grau</th>
+                            <th>Qtd. Presentes</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in sessoes %}
+                        <tr>
+                            <td>{{ s.sessao | datetimeformat }}</td>
+                            <td>{{ s.grau }}</td>
+                            <td>{{ presencas_por_sessao.get(s.sessao, 0) }}</td>
+                            <td>
+                                <a href="/presencas?editar={{ s.sessao }}" class="btn btn-sm btn-primary">Consultar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header bg-warning">
+            <h5 class="modal-title" id="confirmModalLabel">Confirmar Salvamento</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+            Tem certeza de que deseja salvar as presenças selecionadas para esta sessão?
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="confirmarSalvar">Sim, Salvar</button>
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        document.getElementById('confirmarSalvar').addEventListener('click', function () {
+            document.getElementById('presencaForm').submit();
+        });
+    </script>
+
+</body>
+</html>

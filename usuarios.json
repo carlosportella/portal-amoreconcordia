@@ -2,25 +2,37 @@
   {
     "sim": "14144",
     "senha": "AMORC2025*",
-    "nome": "Carlos",
-    "admin": 1,
-    "aniversario": "1980-04-15",
+    "nome": "CARLOS",
+    "admin": 2,
+    "aniversario": "1977-12-14",
     "emerito": 1,
-    "remido": 0,
+    "remido": 1,
     "ativo": 1,
     "lojabase": "Mestre",
-    "filosoficos": "Grau 18"
+    "filosoficos": "Grau 14"
   },
   {
     "sim": "20201",
     "senha": "SENHA123",
-    "nome": "Maria",
+    "nome": "Rabello",
+    "admin": 1,
+    "aniversario": "1945-07-04",
+    "emerito": 1,
+    "remido": 1,
+    "ativo": 1,
+    "lojabase": "Mestre",
+    "filosoficos": "Grau 33"
+  },
+  {
+    "sim": "12345",
+    "senha": "12345",
+    "nome": "COMUM1",
     "admin": 0,
-    "aniversario": "1992-07-22",
+    "aniversario": "2010-01-01",
     "emerito": 0,
     "remido": 0,
     "ativo": 1,
-    "lojabase": "Companheiro",
-    "filosoficos": "Grau 5"
+    "lojabase": "Aprendiz",
+    "filosoficos": "Grau 1"
   }
 ]

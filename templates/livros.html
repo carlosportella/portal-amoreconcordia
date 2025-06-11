@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Livros</title>
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            background: url("/static/images/P1010501.JPG") no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .bg-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(255, 255, 255, 0.5);
+            z-index: 0;
+        }
+
+        .df-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #flipbook_viewer {
+            width: 100%;
+            height: 100%;
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        .df-ui__background {
+            background: transparent !important;
+        }
+    </style>    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="bg-overlay"></div>
+
+    <div class="container mt-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Cadastro de Livros</h4>
+            </div>
+            <div class="card-body">
+                <form id="livroForm" method="POST" action="/salvar_livro">
+                    <input type="hidden" name="modo" id="modo" value="novo">
+                    <input type="hidden" name="nome_original" id="nome_original" value="">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="nome" class="form-label">Nome do Livro</label>
+                            <input type="text" class="form-control" name="nome" id="nome" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="arquivo" class="form-label">Arquivo PDF (ex: LIVRO_3.PDF)</label>
+                            <input type="text" class="form-control" name="arquivo" id="arquivo" required>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success" id="salvarBtn">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4 shadow">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Livros Cadastrados</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Arquivo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for livro in livros %}
+                        <tr>
+                            <td>{{ livro.nome }}</td>
+                            <td>{{ livro.arquivo }}</td>
+                            <td>
+                                {% if session.get('admin') >= 2 %}
+                                    <button type="button" class="btn btn-sm btn-primary"  onclick='carregarLivro({{ livro | tojson | safe }})'>Alterar</button>
+                                    <a href="/excluir_livro/{{ livro.nome }}" class="btn btn-sm btn-danger">Excluir</a>
+                                {% else %}
+                                    <span class="text-muted">Somente leitura</span>
+                                {% endif %}
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function carregarLivro(livro) {
+            document.getElementById('modo').value = 'editar';
+            document.getElementById('nome_original').value = livro.nome;
+            document.getElementById('nome').value = livro.nome;
+            document.getElementById('arquivo').value = livro.arquivo;
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualizador de Livro</title>
+
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            background: url("/static/images/P1010501.JPG") no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .bg-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(255, 255, 255, 0.5);
+            z-index: 0;
+        }
+
+        .df-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #flipbook_viewer {
+            width: 100%;
+            height: 100%;
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        .df-ui__background {
+            background: transparent !important;
+        }
+    </style>
+
+
+    <!-- DFlip styles -->
+    <link href="{{ url_for('static', filename='dflip/css/dflip.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='dflip/css/themify-icons.min.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="bg-overlay"></div>
+
+    <div class="df-container">
+        <div class="_df_book" source="{{ pdf_url }}" id="flipbook_viewer"></div>
+    </div>
+
+    <!-- DFlip scripts -->
+    <script src="{{ url_for('static', filename='dflip/js/libs/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='dflip/js/dflip.min.js') }}"></script>
+</body>
+</html>
+
+
+
+

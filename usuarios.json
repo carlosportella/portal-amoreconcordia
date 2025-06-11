@@ -1,0 +1,14 @@
+[
+  {
+    "sim": "14144",
+    "senha": "AMORC2025*",
+    "nome": "Carlos",
+    "admin": 1
+  },
+  {
+    "nome": "Teste",
+    "sim": "12345",
+    "senha": "1234",
+    "admin": 0
+  }
+]

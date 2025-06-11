@@ -82,42 +82,32 @@ def salvar_usuario():
     if 'usuario' not in session or session.get('admin') != 1:
         return redirect('/')
 
+    sim = request.form['sim']
+    sim_original = request.form.get('sim_original', sim)
+    modo = request.form.get('modo', 'novo')
+
     novo_usuario = {
-        "nome": request.form['nome'],
-        "sim": request.form['sim'],
+        "sim": sim,
         "senha": request.form['senha'],
-        "admin": int(request.form.get('admin', 0))
+        "nome": request.form['nome'],
+        "admin": int('admin' in request.form),
+        "aniversario": request.form.get('aniversario', ''),
+        "emerito": int('emerito' in request.form),
+        "remido": int('remido' in request.form),
+        "ativo": int('ativo' in request.form),
+        "lojabase": request.form.get('lojabase', 'Aprendiz'),
+        "filosoficos": request.form.get('filosoficos', 'Grau 1')
     }
 
     with open('usuarios.json') as f:
         usuarios = json.load(f)
 
-    usuarios = [u for u in usuarios if u['sim'] != novo_usuario['sim']]
+    # Remove o antigo se estiver em modo de edição
+    usuarios = [u for u in usuarios if u['sim'] != sim_original]
     usuarios.append(novo_usuario)
 
     with open('usuarios.json', 'w') as f:
         json.dump(usuarios, f, indent=2)
 
     return redirect('/usuarios')
-
-@app.route('/excluir_usuario/<sim>')
-def excluir_usuario(sim):
-    if 'usuario' not in session or session.get('admin') != 1:
-        return redirect('/')
-
-    with open('usuarios.json') as f:
-        usuarios = json.load(f)
-
-    usuarios = [u for u in usuarios if u['sim'] != sim]
-
-    with open('usuarios.json', 'w') as f:
-        json.dump(usuarios, f, indent=2)
-
-    return redirect('/usuarios')
-
-
-if __name__ == '__main__':
-    import os
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)), debug=True)
-
 
